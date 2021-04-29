@@ -4,6 +4,7 @@ import io.github.openminigameserver.nickarcade.core.data.sender.player.ArcadePla
 import io.github.openminigameserver.nickarcade.display.scoreboard.ScoreboardData
 import io.github.openminigameserver.nickarcade.display.scoreboard.ScoreboardDataProvider
 import io.github.openminigameserver.nickarcade.display.scoreboard.impl.DefaultScoreboardDataProvider
+import org.bukkit.scoreboard.Team
 
 object ScoreboardDataProviderManager {
 
@@ -15,10 +16,11 @@ object ScoreboardDataProviderManager {
         providers.add(0, provider)
     }
 
-    suspend fun computeData(player: ArcadePlayer, excludeScoreboard: Boolean): ScoreboardData {
-        val prefix = providers.mapNotNull { it.providePrefix(player) }.firstOrNull()
-        val suffix = providers.mapNotNull { it.provideSuffix(player) }.firstOrNull()
-        val sideBar = providers.takeIf { !excludeScoreboard }?.mapNotNull { it.provideSideBar(player) }?.firstOrNull()
-        return ScoreboardData(prefix, suffix, sideBar)
+    suspend fun computeData(player: ArcadePlayer, team: Team, excludeScoreboard: Boolean): ScoreboardData {
+        val providedTeamModification = providers.firstOrNull { it.provideTeamConfiguration(player, team) } != null
+        val prefix = providers.takeUnless { providedTeamModification }?.mapNotNull { it.providePrefix(player) }?.firstOrNull()
+        val suffix = providers.takeUnless { providedTeamModification }?.mapNotNull { it.provideSuffix(player) }?.firstOrNull()
+        val sideBar = providers.takeUnless { providedTeamModification }?.takeIf { !excludeScoreboard }?.mapNotNull { it.provideSideBar(player) }?.firstOrNull()
+        return ScoreboardData(prefix, suffix, sideBar, providedTeamModification)
     }
 }

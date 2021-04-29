@@ -27,7 +27,9 @@ object ScoreboardManager {
     suspend fun refreshScoreboard(player: Player) {
         val scoreboardSourcePlayer = async { player.getArcadeSender() }
         val playerScoreboard = scoreboardSourcePlayer[scoreboardTag]
-            ?: Bukkit.getScoreboardManager().newScoreboard.also { player.scoreboard = it; scoreboardSourcePlayer[scoreboardTag] = it }
+            ?: Bukkit.getScoreboardManager().newScoreboard.also {
+                player.scoreboard = it; scoreboardSourcePlayer[scoreboardTag] = it
+            }
 
         getOnlinePlayers().forEach { target ->
             val targetPlayer = async { target.getArcadeSender() }
@@ -37,6 +39,7 @@ object ScoreboardManager {
 
             val scoreData = ScoreboardDataProviderManager.computeData(
                 targetPlayer,
+                team,
                 targetPlayer != scoreboardSourcePlayer
             )
             applyScoreboardTeam(team, scoreData, playerName)
@@ -55,19 +58,21 @@ object ScoreboardManager {
         scoreData: ScoreboardData,
         playerName: String
     ) {
-        team.prefix(scoreData.prefix ?: empty())
-        team.suffix(
-            scoreData.suffix?.replaceText(
-                TextReplacementConfig.builder().match("\\s+\$").replacement("").build()
-            )?.let { text(' ').append(it) } ?: empty())
-        //Compute team color
-        scoreData.prefix?.let { prefix ->
-            val prefixComponent = LegacyComponentSerializer.legacySection()
-                .deserialize(LegacyComponentSerializer.legacySection().serialize(prefix))
-            val teamColor = prefixComponent.color() ?: prefixComponent.children().flatMap { it.children() + it }
-                .lastOrNull { it.color() != null }?.color()
-            teamColor?.let { NamedTextColor.nearestTo(it) }?.also {
-                team.color(it)
+        if (!scoreData.providedTeamData) {
+            team.prefix(scoreData.prefix ?: empty())
+            team.suffix(
+                scoreData.suffix?.replaceText(
+                    TextReplacementConfig.builder().match("\\s+\$").replacement("").build()
+                )?.let { text(' ').append(it) } ?: empty())
+            //Compute team color
+            scoreData.prefix?.let { prefix ->
+                val prefixComponent = LegacyComponentSerializer.legacySection()
+                    .deserialize(LegacyComponentSerializer.legacySection().serialize(prefix))
+                val teamColor = prefixComponent.color() ?: prefixComponent.children().flatMap { it.children() + it }
+                    .lastOrNull { it.color() != null }?.color()
+                teamColor?.let { NamedTextColor.nearestTo(it) }?.also {
+                    team.color(it)
+                }
             }
         }
         team.addEntry(playerName)

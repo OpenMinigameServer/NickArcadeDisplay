@@ -1,36 +1,47 @@
 package io.github.openminigameserver.nickarcade.display.nick
 
-import com.fasterxml.jackson.databind.json.JsonMapper
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
-import java.net.URL
+import kotlin.random.Random
+import kotlin.random.nextInt
 
 object RandomNickGenerator {
     private val namesQueue = ArrayDeque<String>()
 
     suspend fun getNewName(): String {
         fetchNamesIfNeeded()
-        return namesQueue.removeFirst().let {
-            var underscoreCount = 0
-            it.takeWhile { c ->
-                if (c == '_') {
-                    underscoreCount++
-                }
-                underscoreCount <= 1
-            }
-        }
+        return namesQueue.removeFirst()
     }
 
-    private val possibleTypes = arrayOf("boy_names", "girl_names")
-    private val mapper = JsonMapper()
-    private suspend fun fetchNamesIfNeeded() {
+    val nameFormats = arrayOf(
+        "First_LastYear",
+        "FirstDoesGaming",
+        "smhFirst",
+        "Firstxd",
+        "ilyFirst",
+        "FirstToggled",
+        "LilLast",
+        "SweetFirst",
+        "DepressedFirst",
+        "FirstIsHere",
+        "FirstNotFound",
+        "SaltyFirst",
+        "_FirstYear_",
+        "ImFirst",
+        "yFirst",
+        "FirstGames",
+        "FirstYT",
+        "NotFirst",
+        "ProbablyFirst",
+        "FirstWasFound",
+        "FirstWasTaken",
+        "ShutUpFirst",
+        )
+
+    private fun fetchNamesIfNeeded() {
         if (namesQueue.size <= 5) {
-            val result = withContext(Dispatchers.IO) {
-                URL("http://names.drycodes.com/10?nameOptions=${possibleTypes.random()}").readText()
+            repeat(10) {
+                namesQueue += nameFormats.random().replace("First", firstNames.random())
+                    .replace("Last", lastNames.random()).replace("Year", Random.nextInt(1990..2021).toString())
             }
-            val resultNames =
-                mapper.readValue<Array<String>>(result, mapper.typeFactory.constructArrayType(String::class.java))
-            namesQueue.addAll(resultNames)
         }
     }
 

@@ -29,10 +29,10 @@ import io.github.openminigameserver.profile.models.Profile
 import kotlinx.coroutines.delay
 import net.kyori.adventure.inventory.Book
 import net.kyori.adventure.text.Component
-import net.kyori.adventure.text.Component.newline
-import net.kyori.adventure.text.Component.text
+import net.kyori.adventure.text.Component.*
 import net.kyori.adventure.text.event.ClickEvent
 import net.kyori.adventure.text.format.NamedTextColor
+import net.kyori.adventure.text.format.NamedTextColor.*
 import net.kyori.adventure.text.format.Style
 import net.kyori.adventure.text.format.TextDecoration
 import org.bukkit.Bukkit
@@ -40,7 +40,6 @@ import org.bukkit.ChatColor
 import org.bukkit.entity.Player
 import java.util.*
 import kotlin.random.Random
-import kotlin.random.nextInt
 import kotlin.time.seconds
 
 object NewNickCommand {
@@ -148,7 +147,7 @@ object NewNickCommand {
     }
 
 
-    private suspend fun getRandomProfileName() = (RandomNickGenerator.getNewName() + Random.nextInt(1990..2021)).take(16)
+    private suspend fun getRandomProfileName() = (RandomNickGenerator.getNewName()).take(16)
 
     @Hidden
     @RequiredRank(HypixelPackageRank.SUPERSTAR)
@@ -209,7 +208,8 @@ object NewNickCommand {
     ) {
         sender.nickContext.skin = when (skin) {
             "alex" -> alexProfile
-            else -> (ProfilesManager.profiles.firstOrNull { it.name == skin }?.asPlayerProfile(sender.uuid) ?: steveProfile)
+            else -> (ProfilesManager.profiles.firstOrNull { it.name == skin }?.asPlayerProfile(sender.uuid)
+                ?: steveProfile)
         }
         sender.nickContext.skinName = skin
         sender.audience.sendMessage(text {
@@ -218,6 +218,7 @@ object NewNickCommand {
             it.append(text(".", NamedTextColor.GREEN))
         })
     }
+
     private val validNamePattern = Regex("^[a-zA-Z0-9_]{3,16}\$")
 
     @Hidden
@@ -247,7 +248,11 @@ object NewNickCommand {
                             )
                         )
                         ChatInput.requestInput(this, onSuccess = {
-                            launch { this@requestInput.performCommand(setNickNameAndRespawn(it).value().removePrefix("/")) }
+                            launch {
+                                this@requestInput.performCommand(
+                                    setNickNameAndRespawn(it).value().removePrefix("/")
+                                )
+                            }
                         }, isValid = {
                             return@requestInput validNamePattern.matchEntire(it) != null
                         })
@@ -257,7 +262,7 @@ object NewNickCommand {
             page.append(
                 text("➤ Use a random name").hoverEvent(
                     text("Click to use a randomly generated name")
-                ).clickEvent(setNickNameAndRespawn("random")).append(newline())
+                ).clickEvent(setRandomNickNameAndRespawn()).append(newline())
             )
 
             val name = sender.displayOverrides?.displayProfile?.displayName
@@ -273,7 +278,10 @@ object NewNickCommand {
         sender.openBook(page)
     }
 
+    private fun setRandomNickNameAndRespawn() = setNickNameAndRespawn("random-gui")
 
+
+    @Hidden
     @RequiredRank(HypixelPackageRank.SUPERSTAR)
     @CommandMethod("nick actualsetname <name>")
     fun nickSetName(
@@ -316,6 +324,40 @@ object NewNickCommand {
         sender: ArcadePlayer,
         @Argument("name") name: String
     ) = command(sender) {
+        if (name == "random-gui") {
+            sender.audience.sendMessage(text("Processing request. Please wait...", YELLOW))
+            val newName = RandomNickGenerator.getNewName()
+
+            sender.openBook(
+                text { page ->
+                    page.append(text("We've generated a random username for you:"))
+                    page.append(newline())
+                    page.append(text(newName, Style.style(TextDecoration.BOLD)))
+                    page.append(newline())
+                    page.append(newline())
+
+                    repeat(7) { page.append(space()) }
+                    page.append(
+                        text("USE NAME", DARK_GREEN, TextDecoration.BOLD, TextDecoration.UNDERLINED).clickEvent(
+                            setNickNameAndRespawn(newName)
+                        ).hoverEvent(text("Click here to use this name."))
+                    )
+                    page.append(newline())
+
+                    repeat(6) { page.append(space()) }
+                    page.append(
+                        text("TRY AGAIN", RED, TextDecoration.BOLD, TextDecoration.UNDERLINED).clickEvent(
+                            setRandomNickNameAndRespawn()
+                        ).hoverEvent(text("Click here to generate another name."))
+                    )
+                    page.append(newline())
+
+                }
+            )
+
+            return@command
+        }
+
         val isYoutuber = sender.hasAtLeastRank(HypixelPackageRank.YOUTUBER, true)
         nickSetName(sender, name)
         delay(1.seconds)
@@ -324,7 +366,12 @@ object NewNickCommand {
                 page.append(text("You have finished setting up your nickname!")).append(newline())
                 page.append(newline())
                 page.append(text("When you go into a game, you will be nicked as "))
-                page.append(text((sender.nickContext.rank ?: HypixelPackageRank.NORMAL).defaultPrefix + sender.nickContext.playerName!!) )
+                page.append(
+                    text(
+                        (sender.nickContext.rank
+                            ?: HypixelPackageRank.NORMAL).defaultPrefix + sender.nickContext.playerName!!
+                    )
+                )
                 page.append(text("."))
                 if (!isYoutuber) {
                     page.append(text("You will not be nicked in lobbies."))
@@ -400,7 +447,12 @@ object NewNickCommand {
         }
 
         if (!player.nickContext.isValid()) {
-            player.audience.sendMessage(text("You have not finished setting up your nickname! Run /nick to fix this issue.", NamedTextColor.RED))
+            player.audience.sendMessage(
+                text(
+                    "You have not finished setting up your nickname! Run /nick to fix this issue.",
+                    NamedTextColor.RED
+                )
+            )
             return
         }
 
@@ -427,7 +479,8 @@ object NewNickCommand {
         val properties = mutableMapOf<String, List<DumpedProperty>>()
         val profileTextures = textures?.raw
         if (profileTextures != null) {
-            properties["textures"] = listOf(DumpedProperty("textures", profileTextures.value, profileTextures.signature))
+            properties["textures"] =
+                listOf(DumpedProperty("textures", profileTextures.value, profileTextures.signature))
         }
         return DumpedProfile(name!!, name!!, name!!, uuid!!, properties)
     }
