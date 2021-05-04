@@ -11,7 +11,7 @@ object RandomNickGenerator {
         return namesQueue.removeFirst()
     }
 
-    val nameFormats = arrayOf(
+    private val nameFormats = arrayOf(
         "First_LastYear",
         "FirstDoesGaming",
         "smhFirst",
@@ -34,13 +34,22 @@ object RandomNickGenerator {
         "FirstWasFound",
         "FirstWasTaken",
         "ShutUpFirst",
-        )
+    )
 
     private fun fetchNamesIfNeeded() {
         if (namesQueue.size <= 5) {
-            repeat(10) {
-                namesQueue += nameFormats.random().replace("First", firstNames.random())
+
+
+            var count = 0
+            while (count < 10) {
+                val name = nameFormats.random().replace("First", firstNames.random())
                     .replace("Last", lastNames.random()).replace("Year", Random.nextInt(1990..2021).toString())
+
+                //Make sure to generate names with at most 16 chars
+                if (name.length <= 16) {
+                    namesQueue += name
+                    count++
+                }
             }
         }
     }

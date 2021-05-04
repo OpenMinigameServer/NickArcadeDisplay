@@ -6,7 +6,11 @@ import io.github.openminigameserver.nickarcade.core.events.data.PlayerDataJoinEv
 import io.github.openminigameserver.nickarcade.core.events.data.PlayerDataLeaveEvent
 import io.github.openminigameserver.nickarcade.core.events.data.PlayerDataReloadEvent
 import io.github.openminigameserver.nickarcade.core.manager.getArcadeSender
+import io.github.openminigameserver.nickarcade.core.ticks
 import io.github.openminigameserver.nickarcade.display.displayOverrides
+import io.github.openminigameserver.nickarcade.plugin.extensions.launchAsync
+import io.github.openminigameserver.nickarcade.plugin.extensions.sync
+import kotlinx.coroutines.delay
 import org.bukkit.entity.Player
 import java.util.*
 
@@ -33,7 +37,16 @@ suspend fun Player.setDisplayProfile(profile: DumpedProfile?, reloadProfile: Boo
     reloadProfile(getArcadeSender(), reloadProfile) {
         if (!oldProfilesMap.containsKey(uniqueId))
             oldProfilesMap[uniqueId] = playerProfile
+        val oldLocation = location
         playerProfile = profile?.asPlayerProfile(uniqueId) ?: oldProfilesMap[uniqueId] ?: playerProfile
         displayOverrides?.displayProfile = profile
+        if (isFloodgatePlayer) {
+            launchAsync {
+                delay(10.ticks)
+                sync {
+                    teleport(oldLocation)
+                }
+            }
+        }
     }
 }

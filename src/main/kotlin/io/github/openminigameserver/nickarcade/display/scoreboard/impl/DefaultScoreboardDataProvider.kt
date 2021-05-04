@@ -26,7 +26,15 @@ object DefaultScoreboardDataProvider : ScoreboardDataProvider {
         )
     }
 
-    override suspend fun providePrefix(player: ArcadePlayer): Component {
-        return text(player.effectivePrefix)
+    override suspend fun providePrefix(target: ArcadePlayer, viewer: ArcadePlayer): Component {
+        return text(target.effectivePrefix)
+    }
+
+    override suspend fun provideSuffix(target: ArcadePlayer, viewer: ArcadePlayer): Component? {
+        if (target.isFloodgatePlayer) {
+            return text(" [BEDROCK]", NamedTextColor.DARK_AQUA)
+        }
+
+        return null
     }
 }

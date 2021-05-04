@@ -31,7 +31,6 @@ import net.kyori.adventure.inventory.Book
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.Component.*
 import net.kyori.adventure.text.event.ClickEvent
-import net.kyori.adventure.text.format.NamedTextColor
 import net.kyori.adventure.text.format.NamedTextColor.*
 import net.kyori.adventure.text.format.Style
 import net.kyori.adventure.text.format.TextDecoration
@@ -45,7 +44,7 @@ import kotlin.time.seconds
 object NewNickCommand {
     private val nickContextTag = RuntimeExtraDataTag.of<NickContext>("nickcontext")
 
-    var ArcadePlayer.nickContext: NickContext
+    private var ArcadePlayer.nickContext: NickContext
         get() = this[nickContextTag] ?: NickContext().also {
             this.nickContext = it
         }
@@ -61,13 +60,13 @@ object NewNickCommand {
     ) {
         sender.nickContext.rank = rank
         sender.audience.sendMessage(text {
-            it.append(text("Set your nick rank to ", NamedTextColor.GREEN))
+            it.append(text("Set your nick rank to ", GREEN))
             if (rank <= HypixelPackageRank.NORMAL) {
-                it.append(text("DEFAULT", NamedTextColor.GRAY))
+                it.append(text("DEFAULT", GRAY))
             } else {
                 it.append(text(rank.defaultPrefix.trim().replace("[", "").replace("]", "")))
             }
-            it.append(text("!", NamedTextColor.GREEN))
+            it.append(text("!", GREEN))
         })
     }
 
@@ -168,7 +167,7 @@ object NewNickCommand {
                 text("➤ My normal skin").hoverEvent(
                     text("Click here to use your normal skin")
                         .append(newline())
-                        .append(text("WARNING: ", NamedTextColor.RED))
+                        .append(text("WARNING: ", RED))
                         .append(text("Players will be able to know who you are if you use this option."))
 
                 ).clickEvent(setSkinClickEvent("self")).append(newline())
@@ -213,9 +212,9 @@ object NewNickCommand {
         }
         sender.nickContext.skinName = skin
         sender.audience.sendMessage(text {
-            it.append(text("Your skin has been set to ", NamedTextColor.GREEN))
-            it.append(text(skin, NamedTextColor.GREEN))
-            it.append(text(".", NamedTextColor.GREEN))
+            it.append(text("Your skin has been set to ", GREEN))
+            it.append(text(skin, GREEN))
+            it.append(text(".", GREEN))
         })
     }
 
@@ -244,7 +243,7 @@ object NewNickCommand {
                         sendMessage(
                             text(
                                 "Please type the name you want to use in chat.",
-                                NamedTextColor.GOLD
+                                GOLD
                             )
                         )
                         ChatInput.requestInput(this, onSuccess = {
@@ -372,7 +371,7 @@ object NewNickCommand {
                             ?: HypixelPackageRank.NORMAL).defaultPrefix + sender.nickContext.playerName!!
                     )
                 )
-                page.append(text("."))
+                page.append(text(".", Style.empty()))
                 if (!isYoutuber) {
                     page.append(text("You will not be nicked in lobbies."))
                 }
@@ -432,17 +431,16 @@ object NewNickCommand {
     }
 
     private fun ArcadePlayer.openBook(page: Component) {
-        player?.openBook(Book.book(text("NickArcade"), text("NickAc"), page))
+        audience.openBook(Book.book(text("NickArcade"), text("NickAc"), page))
     }
 
-    private val bookToShow = RuntimeExtraDataTag.of<Component>("nickBookToShow")
     private suspend fun Player.applyNickContext(context: NickContext?) {
         val player = getArcadeSender()
         val bukkitPlayer = player.player ?: return
         if (context == null) {
             player.displayOverrides?.resetDisguise()
             bukkitPlayer.setDisplayProfile(null, true)
-            player.audience.sendMessage(text("Your nick has been reset!", NamedTextColor.GREEN))
+            player.audience.sendMessage(text("Your nick has been reset!", GREEN))
             return
         }
 
@@ -450,7 +448,7 @@ object NewNickCommand {
             player.audience.sendMessage(
                 text(
                     "You have not finished setting up your nickname! Run /nick to fix this issue.",
-                    NamedTextColor.RED
+                    RED
                 )
             )
             return
@@ -471,7 +469,7 @@ object NewNickCommand {
         }
 
         bukkitPlayer.setDisplayProfile(profile, true)
-        player.audience.sendMessage(text("You are now nicked as ${profile.name}!", NamedTextColor.GREEN))
+        player.audience.sendMessage(text("You are now nicked as ${profile.name}!", GREEN))
     }
 
 

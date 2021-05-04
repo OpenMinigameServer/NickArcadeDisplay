@@ -5,11 +5,11 @@ import net.kyori.adventure.text.Component
 import org.bukkit.scoreboard.Team
 
 interface ScoreboardDataProvider {
-    suspend fun provideTeamConfiguration(player: ArcadePlayer, team: Team): Boolean = false
+    suspend fun provideTeamConfiguration(target: ArcadePlayer, viewer: ArcadePlayer, team: Team): Boolean = false
 
-    suspend fun providePrefix(player: ArcadePlayer): Component? = null
+    suspend fun providePrefix(target: ArcadePlayer, viewer: ArcadePlayer): Component? = null
 
-    suspend fun provideSuffix(player: ArcadePlayer): Component? = null
+    suspend fun provideSuffix(target: ArcadePlayer, viewer: ArcadePlayer): Component? = null
 
     suspend fun provideSideBar(player: ArcadePlayer): SidebarData? = null
 }

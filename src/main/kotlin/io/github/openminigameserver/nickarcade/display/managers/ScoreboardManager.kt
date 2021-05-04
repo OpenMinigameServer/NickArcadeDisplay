@@ -24,23 +24,24 @@ object ScoreboardManager {
     private val sidebarTag = RuntimeExtraDataTag.of<ArcadeScoreboard>("sidebar")
     private val bossBarTag = RuntimeExtraDataTag.of<BossBar>("bossbar")
 
-    suspend fun refreshScoreboard(player: Player) {
-        val scoreboardSourcePlayer = async { player.getArcadeSender() }
-        val playerScoreboard = scoreboardSourcePlayer[scoreboardTag]
+    suspend fun refreshScoreboard(viewer: Player) {
+        val viewerPlayer = async { viewer.getArcadeSender() }
+        val playerScoreboard = viewerPlayer[scoreboardTag]
             ?: Bukkit.getScoreboardManager().newScoreboard.also {
-                player.scoreboard = it; scoreboardSourcePlayer[scoreboardTag] = it
+                viewer.scoreboard = it; viewerPlayer[scoreboardTag] = it
             }
 
         getOnlinePlayers().forEach { target ->
             val targetPlayer = async { target.getArcadeSender() }
-            val playerName = targetPlayer.displayName
+            val playerName = targetPlayer.displayName.take(16)
 
             val team = playerScoreboard.getTeam(playerName) ?: playerScoreboard.registerNewTeam(playerName)
 
             val scoreData = ScoreboardDataProviderManager.computeData(
                 targetPlayer,
+                viewerPlayer,
                 team,
-                targetPlayer != scoreboardSourcePlayer
+                targetPlayer != viewerPlayer
             )
             applyScoreboardTeam(team, scoreData, playerName)
             val sidebarData = scoreData.sideBar

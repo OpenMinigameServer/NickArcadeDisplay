@@ -13,17 +13,22 @@ class ArcadeScoreboard(private val arcadePlayer: ArcadePlayer, sidebarData: Side
     }
 
     var sidebarData = sidebarData
-    set(value) {
-        updateLines(value)
-        field = value
-    }
+        set(value) {
+            updateLines(value)
+            field = value
+        }
 
     val scoreboard = arcadePlayer.player!!.scoreboard
 
     val objective = registerObjective()
 
     private fun registerObjective(): Objective {
-        val objective = scoreboard.getObjective(objectiveName) ?: scoreboard.registerNewObjective(objectiveName, "dummy", sidebarData.title)
+        val objective = scoreboard.getObjective(objectiveName) ?: scoreboard.registerNewObjective(
+            objectiveName,
+            "dummy",
+            sidebarData.title
+        )
+        objective.displayName(sidebarData.title)
 
         return objective
     }
@@ -47,8 +52,9 @@ class ArcadeScoreboard(private val arcadePlayer: ArcadePlayer, sidebarData: Side
                 lines.add(createScoreboardLine(i))
             }
         } else if (oldSize > newSize) {
-            for (i in newSize until oldSize) {
-                lines.remove(lines[i].apply { remove() })
+            repeat(oldSize - newSize) {
+                lines.lastOrNull()?.remove()
+                lines.removeLast()
             }
         }
     }
