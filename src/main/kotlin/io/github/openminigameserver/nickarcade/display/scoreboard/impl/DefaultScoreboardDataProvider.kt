@@ -32,7 +32,7 @@ object DefaultScoreboardDataProvider : ScoreboardDataProvider {
 
     override suspend fun provideSuffix(target: ArcadePlayer, viewer: ArcadePlayer): Component? {
         if (target.isFloodgatePlayer) {
-            return text(" [BEDROCK]", NamedTextColor.DARK_AQUA)
+            return text("[BEDROCK]", NamedTextColor.DARK_AQUA)
         }
 
         return null

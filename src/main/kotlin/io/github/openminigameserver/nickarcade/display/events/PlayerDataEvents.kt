@@ -12,7 +12,7 @@ import kotlinx.coroutines.delay
 import org.bukkit.Bukkit.getOnlinePlayers
 import org.bukkit.potion.PotionEffect
 import org.bukkit.potion.PotionEffectType
-import kotlin.time.seconds
+import kotlin.time.Duration
 
 object PlayerDataEvents {
     fun registerHandlers() {
@@ -21,7 +21,7 @@ object PlayerDataEvents {
                 for (player in getOnlinePlayers()) {
                     player.let { ScoreboardManager.refreshScoreboard(it) }
                 }
-                delay(1.seconds)
+                delay(Duration.seconds(1))
             }
         }
 

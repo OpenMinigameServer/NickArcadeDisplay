@@ -28,12 +28,12 @@ class ArcadeScoreboard(private val arcadePlayer: ArcadePlayer, sidebarData: Side
             "dummy",
             sidebarData.title
         )
-        objective.displayName(sidebarData.title)
 
         return objective
     }
 
     private fun updateLines(value: SidebarData) {
+        objective.displayName(sidebarData.title)
         updateLineCount(value)
 
         val newLines = value.lines

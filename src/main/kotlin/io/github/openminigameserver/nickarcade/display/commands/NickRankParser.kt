@@ -47,7 +47,7 @@ class NickRankParser : ArgumentParser<ArcadeSender, HypixelPackageRank> {
         val sender = commandContext.sender as? ArcadePlayer ?: return emptyList()
 
         val validRanks = computeValidRanks(sender.effectiveRank)
-        return validRanks.map { it.name.toLowerCase() }
+        return validRanks.map { it.name.lowercase(Locale.getDefault()) }
     }
 
     override fun isContextFree(): Boolean = false

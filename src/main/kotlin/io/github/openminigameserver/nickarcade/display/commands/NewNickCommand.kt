@@ -39,6 +39,7 @@ import org.bukkit.ChatColor
 import org.bukkit.entity.Player
 import java.util.*
 import kotlin.random.Random
+import kotlin.time.Duration
 import kotlin.time.seconds
 
 object NewNickCommand {
@@ -359,7 +360,7 @@ object NewNickCommand {
 
         val isYoutuber = sender.hasAtLeastRank(HypixelPackageRank.YOUTUBER, true)
         nickSetName(sender, name)
-        delay(1.seconds)
+        delay(Duration.seconds(1))
         sender.openBook(
             text { page ->
                 page.append(text("You have finished setting up your nickname!")).append(newline())
